@@ -3,17 +3,10 @@ const sequelize = require('../utils/database');
 
 const Guild = sequelize.define('guild', {
     id: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
         // cannot be null, has to be unique
-        primaryKey: true
-    },
-    welcomeChannelId: {
-        type: Sequelize.STRING,
-        allowNull: true
-    },
-    welcomeRoleId: {
-        type: Sequelize.STRING,
-        allowNull: true
+        primaryKey: true,
+        autoIncrement: true
     },
     playHour: {
         type: Sequelize.INTEGER,
