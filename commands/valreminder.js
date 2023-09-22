@@ -2,7 +2,7 @@ const momentTimezone = require("moment-timezone")
 const { MessageCollector, InteractionCollector, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js')
 const { ActionRowBuilder, SlashCommandBuilder, ButtonBuilder, ButtonStyle, ChannelType, Events} = require('discord.js');
 const Guild = require('../models/guild');
-const { valChannelId, testChannelId } = require('../config.json');
+//const { valChannelId, testChannelId } = require('../config.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -104,7 +104,8 @@ module.exports = {
                     playHour: hour,
                     playMinutes: minutes,
                     playDate: laCurrentDate.toDate(),
-                    playChannelId: valChannelId,
+                    // playChannelId: valChannelId;
+                    playChannelId: process.env.VAL_CHANNELID,
                     AMorPM: timeType,
                 })
                     .then((savedGuild) => {
