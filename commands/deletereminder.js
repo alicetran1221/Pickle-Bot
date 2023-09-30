@@ -2,21 +2,22 @@ const momentTimezone = require("moment-timezone")
 const { MessageCollector, InteractionCollector, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js')
 const { ActionRowBuilder, SlashCommandBuilder, ButtonBuilder, ButtonStyle, ChannelType, Events} = require('discord.js');
 const Guild = require('../models/guild');
-const { valChannelId, testChannelId } = require('../config.json');
+const Sequelize = require('sequelize');
+//const { valChannelId, testChannelId } = require('../config.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('valreminder')
-        .setDescription('Sends a reminder to play Valorant')
+        .setName('deletereminder')
+        .setDescription('Allows user to delete a reminder.')
         .addIntegerOption(option =>
             option.setName('hour')
-                .setDescription('The hour to play at.')
+                .setDescription('The hour of the scheduled time to delete.')
                 .setRequired(true)
                 .setMaxValue(12)
                 .setMinValue(1))
         .addIntegerOption(option =>
             option.setName('minutes')
-                .setDescription('The minutes of what hour to play at.')
+                .setDescription('The minutes of the scheduled time to delete.')
                 .setRequired(true)
                 .setMaxValue(59)
                 .setMinValue(0))
@@ -50,7 +51,6 @@ module.exports = {
         let laCurrentDate = momentTimezone().tz('America/Los_Angeles');
         laCurrentDate.set({hour: userHour, minute: minutes, second: 0, millisecond: 0}); 
 
-
         // buttons 
         const confirm = new ButtonBuilder()
             .setCustomId('confirm')
@@ -67,10 +67,10 @@ module.exports = {
 
         let content;
         if (minutes < 10) {
-            content = `Are you sure you want to play at ${hour}:0${minutes} ${timeType}?`
+            content = `Are you sure you want to delete the reminder at ${hour}:0${minutes} ${timeType}?`
         }
         else {
-            content = `Are you sure you want to play at ${hour}:${minutes} ${timeType}?`
+            content = `Are you sure you want to delete the reminder at ${hour}:${minutes} ${timeType}?`
         }
         
         const response = await interaction.reply(
@@ -83,43 +83,37 @@ module.exports = {
         const collectorFilter = i => i.user.id === interaction.user.id;
 
         // try catch for if the person doesn't respond to the message
-        const existingDates = new Set();
         try {
             const confirmation = await response.awaitMessageComponent({filter: collectorFilter, time: 30000});
             if (confirmation.customId === 'confirm') {
-                // making sure there are no repeats for the scheduled time
-                const guilds = await Guild.findAll();
-                for (const guild of guilds) {
-                   existingDates.add(guild.playDate.getTime());
-                }
 
-                const currentTimestamp = laCurrentDate.toDate().getTime();
-                if (existingDates.has(currentTimestamp)) {
-                    await confirmation.update({content: 'This time has been scheduled already.', components: []});
+                try {
+                    const deletedReminder = await Guild.findOne({
+                        where: {
+                            playDate: {
+                                [Sequelize.Op.eq]: laCurrentDate.toDate(),
+                            },
+                        },
+                    });
+                    
+                    if (deletedReminder) {
+                        await deletedReminder.destroy();
+                    }
+                    else {
+                        await confirmation.update({content: `No reminder at this time was found.`, components: []});
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error deleting expired records: ', error);
                     return;
                 }
-                // message will always be sent to #val channel so hard code the channel id
-                // this adds a new row to the database table therefore adding new data to store
-                Guild.create({
-                    playHour: hour,
-                    playMinutes: minutes,
-                    playDate: laCurrentDate.toDate(),
-                    //playChannelId: valChannelId,
-                    playChannelId: process.env.VAL_CHANNELID,
-                    AMorPM: timeType,
-                })
-                    .then((savedGuild) => {
-                        console.log('Inserted Guild with ID:', savedGuild.id);
-                    })
-                    .catch((error) => {
-                        console.error('Error inserting Guild:', error);
-                    });
 
+                
                 if (minutes < 10) {
-                    await confirmation.update({content: `Message scheduled at ${hour}:0${minutes} ${timeType}!`, components: []});
+                    await confirmation.update({content: `Reminder at ${hour}:0${minutes} ${timeType} deleted.`, components: []});
                 }
                 else {
-                    await confirmation.update({content: `Message scheduled at ${hour}:${minutes} ${timeType}!`, components: []});
+                    await confirmation.update({content: `Reminder at ${hour}:${minutes} ${timeType} deleted.`, components: []});
                 }
             }
             else if (confirmation.customId === 'cancel') {

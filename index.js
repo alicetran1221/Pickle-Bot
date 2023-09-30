@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 // Require the necessary discord.js classes
 const {Client, Collection, Events, GatewayIntentBits} = require('discord.js');
-//const { token } = require('./config.json');
+const { token, gamerRoleId } = require('./config.json');
 const momentTimezone = require('moment-timezone');
 const Guild = require('./models/guild');
 const Sequelize = require('sequelize');
@@ -38,7 +38,7 @@ async function sendReminder() {
 			currentTime.isSame(playDate, 'minute')) {
 				const channel = client.channels.cache.get(playChannelId);
 				if (channel) {
-					const messageContent = " @everyone It's time to play Valorant!";
+					const messageContent = `<@&${process.env.GAMER_ROLEID}> It's time to play Valorant!`;
 					await channel.send(messageContent);
 				}
 			}
@@ -98,5 +98,5 @@ client.once(Events.ClientReady, c => {
 });
 
 // log in to Discord with your client's token
-// client.login(token);
+ //client.login(token);
 client.login(process.env.DJS_TOKEN);
