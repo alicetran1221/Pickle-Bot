@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 // Require the necessary discord.js classes
 const {Client, Collection, Events, GatewayIntentBits} = require('discord.js');
-const { token, gamerRoleId } = require('./config.json');
+//const { token, gamerRoleId } = require('./config.json');
 const momentTimezone = require('moment-timezone');
 const Guild = require('./models/guild');
 const Sequelize = require('sequelize');
