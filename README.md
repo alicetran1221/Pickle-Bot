@@ -3,7 +3,7 @@
 ### About
 Pickle Bot is a custom Discord bot in which users can easily set game reminders using slash commands which enhanced user experience
 and engagement in a personal server with me and my friends. At the moment the slash commands are specifically for creating game reminders,
-but I plan building upon this to create a broader system that is useful for any occassion.
+but I plan to build upon this to create a broader system that is useful for any occassion.
 ### Project Motivation
 The purpose of this project was to build on my programming skills, learn more about project management, as well as provide an added convenience to me and my friends within our Discord server.
 Due to how busy our schedules are, it is sometimes hard to find the time to plan and go to our meetups so we found that playing games together was a fun, quick, and easy way
